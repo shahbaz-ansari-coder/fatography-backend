@@ -33,6 +33,11 @@ const celebrityShootSchema = new mongoose.Schema(
                 required: true,
             },
         ],
+
+        video: {
+            type: String,
+            default: null   // optional video
+        }
     },
     { timestamps: true }
 );

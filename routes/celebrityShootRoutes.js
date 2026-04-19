@@ -7,7 +7,9 @@ const router = express.Router();
 router.post(
     "/upload",
     upload.fields([
-        { name: "thumbnails", maxCount: 3 }
+        { name: "images" },
+        { name: "thumbnails", maxCount: 3 },
+        { name: "video", maxCount: 1 }
     ]),
     createCelebrityShoot
 );
