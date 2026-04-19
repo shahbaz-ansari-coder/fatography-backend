@@ -409,3 +409,26 @@ export const deleteService = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+// GET ALL SERVICES (WITHOUT SHOOTS)
+export const getAllServicesWithoutShootImages = async (req, res) => {
+    try {
+        const services = await Service.find()
+            .select("-shoots") // shoots field remove
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.status(200).json({
+            success: true,
+            count: services.length,
+            data: services,
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};

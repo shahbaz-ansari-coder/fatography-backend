@@ -11,7 +11,8 @@ import {
     updateService,
     getAllServices,
     getSingleService,
-    deleteService
+    deleteService,
+    getAllServicesWithoutShootImages
 } from "../controllers/serviceController.js";
 
 const router = express.Router();
@@ -94,6 +95,11 @@ router.put(
 // GET ALL SERVICES
 // =======================
 router.get("/", getAllServices);
+
+// =======================
+// GET SERVICES WITHOUT SHOOT IMAGES
+// =======================
+router.get("/get-data", getAllServicesWithoutShootImages);
 
 
 // =======================

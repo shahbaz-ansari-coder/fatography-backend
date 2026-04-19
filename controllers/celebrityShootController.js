@@ -19,6 +19,7 @@ export const uploadToCloudinary = (buffer, folder) => {
 };
 
 // CREATE CELEBRITY SHOOT
+// CREATE CELEBRITY SHOOT (NO IMAGE LIMIT)
 export const createCelebrityShoot = async (req, res) => {
     try {
         const { celebrityName, photographer, location } = req.body;
@@ -32,12 +33,6 @@ export const createCelebrityShoot = async (req, res) => {
         const imageFiles = req.files?.images || [];
         const thumbnailFiles = req.files?.thumbnails || [];
 
-        if (imageFiles.length > 7) {
-            return res.status(400).json({
-                message: "Maximum 7 images allowed",
-            });
-        }
-
         if (thumbnailFiles.length > 3) {
             return res.status(400).json({
                 message: "Maximum 3 thumbnails allowed",
@@ -47,7 +42,7 @@ export const createCelebrityShoot = async (req, res) => {
         let imageUrls = [];
         let thumbnailUrls = [];
 
-        // Upload Images
+        // Upload IMAGES (NO LIMIT)
         for (const file of imageFiles) {
             const compressedBuffer = await sharp(file.buffer)
                 .resize({ width: 1200 })
@@ -62,7 +57,7 @@ export const createCelebrityShoot = async (req, res) => {
             imageUrls.push(result.secure_url);
         }
 
-        // Upload Thumbnails
+        // Upload THUMBNAILS (max 3 only)
         for (const file of thumbnailFiles) {
             const compressedBuffer = await sharp(file.buffer)
                 .resize({ width: 500 })
@@ -301,6 +296,23 @@ export const updateCelebrityShoot = async (req, res) => {
             success: true,
             message: "Celebrity shoot updated successfully",
             data: shoot
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// GET ALL CELEBRITY SHOOTS WITHOUT IMAGES
+export const getAllCelebrityShootsWithoutImages = async (req, res) => {
+    try {
+        const shoots = await CelebrityShoot.find()
+            .select("-images")   // remove images
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            data: shoots,
         });
 
     } catch (error) {
