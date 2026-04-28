@@ -38,12 +38,9 @@ export const createAdmin = async (req, res) => {
     }
 };
 
-
-
 // LOGIN ADMIN
 export const loginAdmin = async (req, res) => {
     try {
-
         const { email, password } = req.body;
 
         const admin = await Admin.findOne({ email });
@@ -59,16 +56,15 @@ export const loginAdmin = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: admin._id },
+            { id: admin._id }, // ✅ ONLY ID
             "secretKey",
             { expiresIn: "7d" }
         );
 
         res.json({
             message: "Login successful",
-            token
+            token,
         });
-
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -107,6 +103,41 @@ export const updateAdminCredentials = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             error: error.message
+        });
+    }
+};
+
+
+export const verifyAdminToken = async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ message: "No token provided" });
+        }
+
+        const token = authHeader.split(" ")[1];
+
+        const decoded = jwt.verify(token, "secretKey");
+
+        // 🔥 ID BASED CHECK
+        const admin = await Admin.findById(decoded.id);
+
+        if (!admin) {
+            return res.status(403).json({ message: "Access denied: not admin" });
+        }
+
+        return res.status(200).json({
+            message: "Access granted",
+            admin: {
+                id: admin._id,
+                email: admin.email,
+            },
+        });
+    } catch (error) {
+        return res.status(401).json({
+            message: "Invalid or expired token",
+            error: error.message,
         });
     }
 };
