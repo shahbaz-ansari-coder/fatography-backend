@@ -14,7 +14,6 @@ import {
     deleteService,
     getAllServicesWithoutShootImages
 } from "../controllers/serviceController.js";
-import { getSingleCelebrityShoot } from "../controllers/celebrityShootController.js";
 
 const router = express.Router();
 
@@ -106,7 +105,7 @@ router.get("/get-data", getAllServicesWithoutShootImages);
 // =======================
 // GET SINGLE SERVICE
 // =======================
-router.get("/get/:name", getSingleCelebrityShoot);
+router.get("/single-data/:title", getSingleService);
 
 
 // =======================
