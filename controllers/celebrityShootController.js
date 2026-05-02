@@ -42,6 +42,18 @@ export const createCelebrityShoot = async (req, res) => {
 
         const { celebrityName, photographer, location } = req.body;
 
+        // 🔥 ADD THIS ONLY (DUPLICATE CHECK)
+        const existingShoot = await CelebrityShoot.findOne({
+            celebrityName: celebrityName
+        });
+
+        if (existingShoot) {
+            return res.status(400).json({
+                success: false,
+                message: "Celebrity shoot with this name already exists",
+            });
+        }
+
         if (!celebrityName || !photographer || !location) {
             return res.status(400).json({
                 message: "Celebrity name, photographer and location required",
@@ -127,6 +139,7 @@ export const createCelebrityShoot = async (req, res) => {
     }
 };
 
+
 // GET ALL CELEBRITY SHOOTS
 export const getAllCelebrityShoots = async (req, res) => {
     try {
@@ -145,13 +158,18 @@ export const getAllCelebrityShoots = async (req, res) => {
     }
 };
 
-// GET SINGLE CELEBRITY SHOOT
 export const getSingleCelebrityShoot = async (req, res) => {
     try {
+        const { name } = req.params;
 
-        const { id } = req.params;
+        // Convert URL format → DB format
+        const formattedName = name
+            .replace(/-/g, " ")
+            .toLowerCase();
 
-        const shoot = await CelebrityShoot.findById(id);
+        const shoot = await CelebrityShoot.findOne({
+            celebrityName: new RegExp("^" + formattedName + "$", "i")
+        });
 
         if (!shoot) {
             return res.status(404).json({
@@ -245,7 +263,22 @@ export const updateCelebrityShoot = async (req, res) => {
             });
         }
 
-        if (celebrityName) shoot.celebrityName = celebrityName;
+        // 🔥 ADD THIS (DUPLICATE NAME CHECK ON UPDATE)
+        if (celebrityName) {
+            const existing = await CelebrityShoot.findOne({
+                celebrityName: celebrityName.trim()
+            });
+
+            if (existing) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Celebrity name already exists",
+                });
+            }
+
+            shoot.celebrityName = celebrityName;
+        }
+
         if (photographer) shoot.photographer = photographer;
         if (location) shoot.location = location;
 
@@ -350,7 +383,6 @@ export const updateCelebrityShoot = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
 // GET SHOOTS WITHOUT IMAGES
 export const getAllCelebrityShootsWithoutImages = async (req, res) => {
     try {

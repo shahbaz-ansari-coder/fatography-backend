@@ -1,6 +1,6 @@
 import express from "express";
 import upload from "../middleware/upload.js";
-
+import slugify from "slugify";
 import {
     createService,
     addShoot,
@@ -14,6 +14,7 @@ import {
     deleteService,
     getAllServicesWithoutShootImages
 } from "../controllers/serviceController.js";
+import { getSingleCelebrityShoot } from "../controllers/celebrityShootController.js";
 
 const router = express.Router();
 
@@ -105,7 +106,7 @@ router.get("/get-data", getAllServicesWithoutShootImages);
 // =======================
 // GET SINGLE SERVICE
 // =======================
-router.get("/:id", getSingleService);
+router.get("/get/:name", getSingleCelebrityShoot);
 
 
 // =======================

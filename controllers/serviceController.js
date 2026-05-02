@@ -23,6 +23,16 @@ export const createService = async (req, res) => {
     try {
         const { title, description } = req.body;
 
+        // 🔥 Check if title already exists
+        const existingService = await Service.findOne({ title: title.trim() });
+
+        if (existingService) {
+            return res.status(409).json({
+                success: false,
+                message: "Service title already exists",
+            });
+        }
+
         let bannerUpload = null;
 
         if (req.files?.banner) {
@@ -280,17 +290,47 @@ export const updateService = async (req, res) => {
         const service = await Service.findById(serviceId);
 
         if (!service) {
-            return res.status(404).json({ message: "Service not found" });
+            return res.status(404).json({
+                success: false,
+                message: "Service not found",
+            });
         }
 
         const { title, description } = req.body;
 
-        service.title = title || service.title;
-        service.description = description || service.description;
+        // =========================
+        // 🔥 TITLE UPDATE (SAFE)
+        // =========================
+        if (title) {
+            const cleanTitle = title.trim();
 
-        // banner update
+            const existingService = await Service.findOne({
+                title: cleanTitle,
+                _id: { $ne: serviceId }, // 👈 exclude current service
+            });
+
+            if (existingService) {
+                return res.status(409).json({
+                    success: false,
+                    message: "Service title already exists",
+                });
+            }
+
+            service.title = cleanTitle;
+        }
+
+        // =========================
+        // DESCRIPTION UPDATE
+        // =========================
+        if (description) {
+            service.description = description;
+        }
+
+        // =========================
+        // BANNER UPDATE
+        // =========================
         if (req.files?.banner) {
-            if (service.banner.public_id) {
+            if (service.banner?.public_id) {
                 await cloudinary.uploader.destroy(service.banner.public_id);
             }
 
@@ -305,11 +345,16 @@ export const updateService = async (req, res) => {
             };
         }
 
-        // thumbnails update
+        // =========================
+        // THUMBNAILS UPDATE
+        // =========================
         if (req.files?.thumbnails) {
 
+            // delete old thumbnails
             for (const thumb of service.thumbnails || []) {
-                await cloudinary.uploader.destroy(thumb.public_id);
+                if (thumb.public_id) {
+                    await cloudinary.uploader.destroy(thumb.public_id);
+                }
             }
 
             const thumbnails = [];
@@ -331,16 +376,18 @@ export const updateService = async (req, res) => {
 
         await service.save();
 
-        res.json({
+        return res.json({
             success: true,
             data: service,
         });
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
 };
-
 
 
 // GET ALL SERVICES
@@ -359,20 +406,37 @@ export const getAllServices = async (req, res) => {
 
 
 
-// GET SINGLE SERVICE
 export const getSingleService = async (req, res) => {
     try {
-        const service = await Service.findById(req.params.id);
+        const { title } = req.params;
+
+        // URL format: fitness-photography
+        // DB format: Fitness Photography
+
+        const formattedTitle = title
+            .replace(/-/g, " ")   // hyphen → space
+            .toLowerCase();       // lowercase
+
+        const service = await Service.findOne({
+            title: new RegExp("^" + formattedTitle + "$", "i")
+        });
+
+        if (!service) {
+            return res.status(404).json({
+                success: false,
+                message: "Service not found",
+            });
+        }
 
         res.json({
             success: true,
             data: service,
         });
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
-
 
 
 // DELETE SERVICE

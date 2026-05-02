@@ -23,7 +23,7 @@ router.post(
 
 router.get("/all", getAllCelebrityShoots);
 
-router.get("/get/:id", getSingleCelebrityShoot);
+router.get("/get/:name", getSingleCelebrityShoot);
 
 router.get("/all-no-images", getAllCelebrityShootsWithoutImages);
 
