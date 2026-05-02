@@ -50,7 +50,7 @@ export const createCelebrityShoot = async (req, res) => {
         if (existingShoot) {
             return res.status(400).json({
                 success: false,
-                message: "Celebrity shoot with this name already exists",
+                message: "Celebrity name already exists",
             });
         }
 
