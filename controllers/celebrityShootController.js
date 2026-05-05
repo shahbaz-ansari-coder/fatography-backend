@@ -248,7 +248,6 @@ export const deleteCelebrityShoot = async (req, res) => {
     }
 };
 
-// UPDATE CELEBRITY SHOOT
 export const updateCelebrityShoot = async (req, res) => {
     try {
 
@@ -263,6 +262,8 @@ export const updateCelebrityShoot = async (req, res) => {
             });
         }
 
+        // UPDATE BASIC FIELDS
+        if (celebrityName) shoot.celebrityName = celebrityName;
         if (photographer) shoot.photographer = photographer;
         if (location) shoot.location = location;
 
@@ -270,17 +271,10 @@ export const updateCelebrityShoot = async (req, res) => {
         const thumbnailFiles = req.files?.thumbnails || [];
         const videoFile = req.files?.video?.[0];
 
-        // UPDATE IMAGES
+        // =============================
+        // ✅ UPDATE IMAGES (APPEND MODE)
+        // =============================
         if (imageFiles.length > 0) {
-
-            for (const image of shoot.images) {
-
-                const publicId = image.split("/").pop().split(".")[0];
-
-                await cloudinary.uploader.destroy(
-                    `celebrity-shoots/images/${publicId}`
-                );
-            }
 
             let imageUrls = [];
 
@@ -299,20 +293,14 @@ export const updateCelebrityShoot = async (req, res) => {
                 imageUrls.push(result.secure_url);
             }
 
-            shoot.images = imageUrls;
+            // 🔥 APPEND instead of replace
+            shoot.images = [...(shoot.images || []), ...imageUrls];
         }
 
-        // UPDATE THUMBNAILS
+        // =================================
+        // ✅ UPDATE THUMBNAILS (APPEND MODE)
+        // =================================
         if (thumbnailFiles.length > 0) {
-
-            for (const thumb of shoot.thumbnails) {
-
-                const publicId = thumb.split("/").pop().split(".")[0];
-
-                await cloudinary.uploader.destroy(
-                    `celebrity-shoots/thumbnails/${publicId}`
-                );
-            }
 
             let thumbnailUrls = [];
 
@@ -331,10 +319,13 @@ export const updateCelebrityShoot = async (req, res) => {
                 thumbnailUrls.push(result.secure_url);
             }
 
-            shoot.thumbnails = thumbnailUrls;
+            // 🔥 APPEND instead of replace
+            shoot.thumbnails = [...(shoot.thumbnails || []), ...thumbnailUrls];
         }
 
-        // UPDATE VIDEO
+        // =============================
+        // ✅ UPDATE VIDEO (REPLACE MODE)
+        // =============================
         if (videoFile) {
 
             if (shoot.video) {
@@ -367,6 +358,7 @@ export const updateCelebrityShoot = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 // GET SHOOTS WITHOUT IMAGES
 export const getAllCelebrityShootsWithoutImages = async (req, res) => {
     try {
