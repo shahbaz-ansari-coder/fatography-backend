@@ -299,27 +299,6 @@ export const updateService = async (req, res) => {
         const { title, description } = req.body;
 
         // =========================
-        // 🔥 TITLE UPDATE (SAFE)
-        // =========================
-        if (title) {
-            const cleanTitle = title.trim();
-
-            const existingService = await Service.findOne({
-                title: cleanTitle,
-                _id: { $ne: serviceId }, // 👈 exclude current service
-            });
-
-            if (existingService) {
-                return res.status(409).json({
-                    success: false,
-                    message: "Service title already exists",
-                });
-            }
-
-            service.title = cleanTitle;
-        }
-
-        // =========================
         // DESCRIPTION UPDATE
         // =========================
         if (description) {

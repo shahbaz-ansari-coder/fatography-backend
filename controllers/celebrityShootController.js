@@ -263,22 +263,6 @@ export const updateCelebrityShoot = async (req, res) => {
             });
         }
 
-        // 🔥 ADD THIS (DUPLICATE NAME CHECK ON UPDATE)
-        if (celebrityName) {
-            const existing = await CelebrityShoot.findOne({
-                celebrityName: celebrityName.trim()
-            });
-
-            if (existing) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Celebrity name already exists",
-                });
-            }
-
-            shoot.celebrityName = celebrityName;
-        }
-
         if (photographer) shoot.photographer = photographer;
         if (location) shoot.location = location;
 
