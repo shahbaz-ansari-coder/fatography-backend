@@ -32,18 +32,23 @@ const allowedOrigins = [
     "https://www.fatography.co"
 ];
 
-app.use(cors({
+const corsOptions = {
     origin: (origin, cb) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            cb(null, true);
-        } else {
-            cb(new Error("Not allowed by CORS"));
+        if (!origin) return cb(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+            return cb(null, true);
         }
+
+        return cb(null, false); // safe reject
     },
     credentials: true
-}));
+};
 
-app.options("*", cors());
+app.use(cors(corsOptions));
+
+// IMPORTANT: same config for preflight
+app.options("*", cors(corsOptions));
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/celebrity-shoot", celebrityShootRoutes);
