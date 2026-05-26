@@ -27,12 +27,23 @@ const port = process.env.PORT || 9000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const corsOptions = {
-    origin: "https://fatography.co",
-    credentials: true
-};
+const allowedOrigins = [
+    "https://fatography.co",
+    "https://www.fatography.co"
+];
 
-app.use(cors(corsOptions));
+app.use(cors({
+    origin: (origin, cb) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            cb(null, true);
+        } else {
+            cb(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
+
+app.options("*", cors());
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/celebrity-shoot", celebrityShootRoutes);
