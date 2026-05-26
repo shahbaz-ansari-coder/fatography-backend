@@ -26,29 +26,12 @@ const port = process.env.PORT || 9000;
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const allowedOrigins = [
-    "https://fatography.co",
-    "https://www.fatography.co"
-];
-
 const corsOptions = {
-    origin: (origin, cb) => {
-        if (!origin) return cb(null, true);
-
-        if (allowedOrigins.includes(origin)) {
-            return cb(null, true);
-        }
-
-        return cb(null, false); // safe reject
-    },
-    credentials: true
+  origin: "https://fatography.co",
+  credentials: true
 };
 
 app.use(cors(corsOptions));
-
-// IMPORTANT: same config for preflight
-app.options("*", cors(corsOptions));
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/celebrity-shoot", celebrityShootRoutes);
