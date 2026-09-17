@@ -7,6 +7,7 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import sliderRoutes from "./routes/sliderRoutes.js";
 import shootImageRoutes from "./routes/shootImageRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import dns from 'dns';
 import cors from 'cors';
 
@@ -34,6 +35,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/slider", sliderRoutes);
 app.use("/api/shoot-images", shootImageRoutes);
+app.use("/api/users", userRoutes);
 
 app.listen(port, () => {
     console.log(`Your server is running on http://localhost:${port}/`);
